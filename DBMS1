@@ -5,18 +5,16 @@ function DisplayDatabases
     echo "___________________________________________";
     echo "Your Databases List: "
     index=1;
-    dirList=`ls Databases`
-    #echo ${#dirList[@]}
+    dirList=(`ls Databases`)
+    echo ${#dirList[@]}
     if [ ${#dirList[@]} != 0 ]
     then
-        for i in $dirList
+        for i in ${dirList[@]}
         do 
-            echo "("$index")" $i | tr -d "/";
+            echo "("$index")" $i
             let index+=1;
         done
-    fi        
-    if [ $index == 1 ]
-    then
+    else
         echo "System is Empty!";
     fi
     echo "___________________________________________"; 
@@ -97,14 +95,17 @@ function DisplayTables
     echo "___________________________________________";
     echo "Your Table List: "
     index=1;
-    for i in `ls *data`
-    do 
-       
-        echo "("$index")" $i | cut -f1 -d".";
-        let index+=1;
-    done
-    if [ $index == 1 ]
-    then
+    tableList=(`ls`)
+    #echo ${#tableList[@]}
+    if [ ${#tableList[@]} != 0 ]
+    then 
+        for i in `ls *data`
+        do 
+        
+            echo "("$index")" $i | cut -f1 -d".";
+            let index+=1;
+        done
+    else
         echo "This Database is Empty!";
     fi    
     echo "___________________________________________"; 
