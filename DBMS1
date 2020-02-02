@@ -1,0 +1,188 @@
+#!/bin/bash
+
+function DisplayDatabases
+{
+    echo "___________________________________________";
+    echo "Your Databases List: "
+    index=1;
+    for i in `ls -d */`
+    do 
+        echo "("$index")" $i | tr -d "/";
+        let index+=1;
+    done
+    if [ $index == 1 ]
+    then
+        echo "System is Empty!";
+    fi
+    echo "___________________________________________"; 
+}
+
+function CreateDatabase
+{   
+    found=0;
+    flag=0;
+    echo "Enter Name of Database:"
+    read DBname;
+    while [ $flag == 0 ]
+    do 
+        for i in `ls -d */`
+        do 
+            if [ $i == $DBname/ ]
+            then
+                found=1;
+                break;
+            else  
+                found=0;
+            fi 
+        done
+
+        if [ $found == 1 ]
+        then 
+            echo $DBname "is already exist , Re-enter the Name: "
+            read DBname;
+            flag=0;
+        else 
+            mkdir $DBname;
+            echo "Database Created Successfully..."
+            flag=1;
+        fi
+    done 
+}
+
+function ConnectToDatabase
+{
+    flag=0;
+    found=0;
+    echo "Enter Name of Database: "
+    read DBname;
+    while [ $flag == 0 ]
+    do
+        for i in `ls -d */`
+        do 
+            if [ $i == $DBname/ ]
+            then
+                found=1;
+                break;
+            else
+                found=0;
+            fi    
+        done
+
+        if [ $found == 1 ]
+        then
+            cd $DBname;
+            echo "Connected Successfully...";
+            echo "------------------------ "$DBname "Database ------------------------"
+            TableMenu
+            flag=1;
+        else
+            echo $DBname "Not found.. Please Re-enter the Database Name: ";
+            read DBname;
+            flag=0;
+        fi
+    done
+}
+
+function DisplayTables
+{
+    echo "___________________________________________";
+    echo "Your Table List: "
+    index=1;
+    for i in `ls`
+    do 
+        echo "("$index")" $i ;
+        let index+=1;
+    done
+    if [ $index == 1 ]
+    then
+        echo "This Database is Empty!";
+    fi    
+    echo "___________________________________________"; 
+}
+
+function TableMetaData
+{
+    touch $1.metaData
+    echo "Enter Number Of Fields: "
+    read NoOfCol;
+    echo "NumberOfCols:"$NoOfCol >> $1.metaData;
+    for (( i=1; i<=$NoOfCol; i++ ))
+    do
+        echo "Enter Field Name: "
+        read FName;
+        echo "Enter Field Datatype: "
+        select choice in "Integer" "String"
+        do
+            case $choice in
+                "Integer") echo "Name:"$FName":Datatype:Int"  >> $1.metaData; break ;;
+                "String") echo "Name:"$FName":Datatype:String"  >> $1.metaData; break ;;
+            esac    
+        done
+    done
+} 
+
+function CreateTable
+{
+    found=0;
+    flag=0;
+    echo "Enter Name of Table: ";
+    read TName;
+    while [ $flag = 0 ]
+    do 
+        for i in `ls`
+        do 
+            if [ $i = $TName ]
+            then 
+                found=1;
+                break;
+            else
+                found=0;
+            fi
+        done
+
+        if [ $found = 1 ]
+        then 
+            echo $TName "is already Exist... Please Re-enter Name of Table: "
+            read TName;
+            flag=0;
+        else
+            touch $TName;
+            flag=1;
+            TableMetaData $TName
+            echo $TName "Table Created Successfully...";
+        fi
+    done    
+}
+
+function TableMenu
+{
+    select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
+    do
+        case $choice in
+            "Display Tables") DisplayTables ;;
+            "Create Table") CreateTable ;;
+            "Insert in Table") ;;
+            "Delete from Table") ;; 
+            "Select from Table") ;;
+            "Exit") cd .. 
+                    DatabaseMenu ;;
+        esac
+    done       
+}
+
+function DatabaseMenu
+{
+    echo "------------ Welcome in Nahla & Dalia Database Managment System ------------";
+    select choice in "Display All Dalabases" "Create New Database" "Connect on Database" "Exit"
+    do 
+        case $choice in 
+            "Display All Dalabases") DisplayDatabases ;;
+            "Create New Database") CreateDatabase ;;
+            "Connect on Database") ConnectToDatabase ;;
+            "Exit") exit ;;
+        esac
+    done
+    
+}
+
+DatabaseMenu
