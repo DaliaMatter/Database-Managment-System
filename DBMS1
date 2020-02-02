@@ -5,11 +5,16 @@ function DisplayDatabases
     echo "___________________________________________";
     echo "Your Databases List: "
     index=1;
-    for i in `ls -d */`
-    do 
-        echo "("$index")" $i | tr -d "/";
-        let index+=1;
-    done
+    dirList=`ls Databases`
+    #echo ${#dirList[@]}
+    if [ ${#dirList[@]} != 0 ]
+    then
+        for i in $dirList
+        do 
+            echo "("$index")" $i | tr -d "/";
+            let index+=1;
+        done
+    fi        
     if [ $index == 1 ]
     then
         echo "System is Empty!";
@@ -18,16 +23,16 @@ function DisplayDatabases
 }
 
 function CreateDatabase
-{   
+{
     found=0;
     flag=0;
     echo "Enter Name of Database:"
     read DBname;
     while [ $flag == 0 ]
     do 
-        for i in `ls -d */`
+        for i in `ls Databases`
         do 
-            if [ $i == $DBname/ ]
+            if [ $i == $DBname ]
             then
                 found=1;
                 break;
@@ -42,24 +47,28 @@ function CreateDatabase
             read DBname;
             flag=0;
         else 
+            cd Databases
             mkdir $DBname;
             echo "Database Created Successfully..."
             flag=1;
+            cd ..
         fi
-    done 
+    done
+    
 }
 
 function ConnectToDatabase
 {
+    cd Databases
     flag=0;
     found=0;
     echo "Enter Name of Database: "
     read DBname;
     while [ $flag == 0 ]
     do
-        for i in `ls -d */`
+        for i in `ls`
         do 
-            if [ $i == $DBname/ ]
+            if [ $i == $DBname ]
             then
                 found=1;
                 break;
@@ -88,9 +97,10 @@ function DisplayTables
     echo "___________________________________________";
     echo "Your Table List: "
     index=1;
-    for i in `ls`
+    for i in `ls *data`
     do 
-        echo "("$index")" $i ;
+       
+        echo "("$index")" $i | cut -f1 -d".";
         let index+=1;
     done
     if [ $index == 1 ]
@@ -146,7 +156,7 @@ function CreateTable
             read TName;
             flag=0;
         else
-            touch $TName;
+            touch $TName.data;
             flag=1;
             TableMetaData $TName
             echo $TName "Table Created Successfully...";
@@ -164,7 +174,8 @@ function TableMenu
             "Insert in Table") ;;
             "Delete from Table") ;; 
             "Select from Table") ;;
-            "Exit") cd .. 
+            "Exit") cd ..
+                    cd .. 
                     DatabaseMenu ;;
         esac
     done       
