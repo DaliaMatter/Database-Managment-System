@@ -1,13 +1,36 @@
 #!/bin/bash
 
+function isEmptyDB
+{
+    dirList=(`ls Databases`)
+    if [ ${#dirList[@]} != 0 ]
+    then
+        isEmpty=1
+    else
+        isEmpty=0
+    fi        
+}
+
+function isEmptyT
+{
+    tableList=(`ls`)
+    if [ ${#tableList[@]} != 0 ]
+    then
+        isEmptyy=1
+    else
+        isEmptyy=0
+    fi        
+}
+
 function DisplayDatabases
 {
     echo "___________________________________________";
     echo "Your Databases List: "
     index=1;
+    isEmptyDB
     dirList=(`ls Databases`)
-    echo ${#dirList[@]}
-    if [ ${#dirList[@]} != 0 ]
+    #echo ${#dirList[@]}
+    if [ $isEmpty != 0 ]
     then
         for i in ${dirList[@]}
         do 
@@ -57,37 +80,45 @@ function CreateDatabase
 
 function ConnectToDatabase
 {
-    cd Databases
-    flag=0;
-    found=0;
-    echo "Enter Name of Database: "
-    read DBname;
-    while [ $flag == 0 ]
-    do
-        for i in `ls`
-        do 
-            if [ $i == $DBname ]
-            then
-                found=1;
-                break;
-            else
-                found=0;
-            fi    
-        done
+    isEmptyDB
+    if [ $isEmpty != 0 ]
+    then
+        cd Databases
+        flag=0;
+        found=0;
+        echo "Enter Name of Database: "
+        read DBname;
+        while [ $flag == 0 ]
+        do
+            for i in `ls`
+            do 
+                if [ $i == $DBname ]
+                then
+                    found=1;
+                    break;
+                else
+                    found=0;
+                fi    
+            done
 
-        if [ $found == 1 ]
-        then
-            cd $DBname;
-            echo "Connected Successfully...";
-            echo "------------------------ "$DBname "Database ------------------------"
-            TableMenu
-            flag=1;
-        else
-            echo $DBname "Not found.. Please Re-enter the Database Name: ";
-            read DBname;
-            flag=0;
-        fi
-    done
+            if [ $found == 1 ]
+            then
+                cd $DBname;
+                echo "Connected Successfully...";
+                echo "------------------------ "$DBname "Database ------------------------"
+                TableMenu
+                flag=1;
+            else
+                echo $DBname "Not found.. Please Re-enter the Database Name: ";
+                read DBname;
+                flag=0;
+            fi
+        done
+    else
+        echo "-------------------------------------------------"
+        echo "Sorry but System is Empty"
+        echo "-------------------------------------------------"
+    fi        
 }
 
 function DisplayTables
@@ -95,9 +126,10 @@ function DisplayTables
     echo "___________________________________________";
     echo "Your Table List: "
     index=1;
+    isEmptyT
     tableList=(`ls`)
     #echo ${#tableList[@]}
-    if [ ${#tableList[@]} != 0 ]
+    if [ $isEmptyy != 0 ]
     then 
         for i in `ls *data`
         do 
@@ -115,6 +147,7 @@ function DisplayTables
 function TableMetaData
 {
     touch $1.metaData
+    PK=0;
     echo "Enter Number Of Fields: "
     read NoOfCol;
     echo "NumberOfCols:"$NoOfCol >> $1.metaData;
@@ -131,6 +164,17 @@ function TableMetaData
                 "String") echo $i "Datatype:String"  >> $1.metaData; break ;;
             esac    
         done
+        if [ $PK = 0 ]
+        then
+            echo "Make This Field Primary Key?y/n"
+            read answer
+            case $answer in 
+                ?("y"||"Y")) PK=1; 
+                             echo "PK:$i" >> $1.metaData ;;
+                ?("n"||"N")) PK=0 ;;
+                *) echo "Invalid Input.. So it's No XD "
+            esac
+        fi
     done
 }
 
@@ -173,7 +217,9 @@ function InsertData
     echo "--------------------- $1 Table ---------------------"
     #NoOfCol=`grep "NumberOfCols" $1.metaData | cut -d: -f2`
     NoOfCol=`sed -n '/:/ s/NumberOfCols://p' $1.metaData`
-    echo $NoOfCol
+    PkCol=`sed -n '/:/ s/PK://p' $1.metaData`
+    #echo $NoOfCol
+    echo $PkCol
     declare -a fieldsNames[$NoOfCol];
     declare -a fieldsDatatypes[$NoOfCol];
     NewRecord="";
@@ -186,7 +232,7 @@ function InsertData
     for (( i=1; i<=$NoOfCol; i++ ))
     do
         #echo $i "----->" $NoOfCol
-        echo ${fieldsTypes[$i]}
+        #echo ${fieldsTypes[$i]}
         echo "Enter "${fieldsNames[$i]}" :"
         read data;
         flag=0;
@@ -227,41 +273,47 @@ function DeleteData
 
 function SearchOfTable
 {
-    found=0;
-    flag=0;
-    echo "Enter Name of Table";
-    read TName;
-    tName=$TName.data
-    echo $tName
-    while [ $flag = 0 ]
-    do 
-        for i in `ls`
-        do
-            if [ $i = $tName ]
-            then 
-                found=1;
-                break;
-            else
-                found=0;
-            fi
-        done
+    isEmptyT
+    if [ $isEmptyy != 0 ]
+    then
+        found=0;
+        flag=0;
+        echo "Enter Name of Table";
+        read TName;
+        tName=$TName.data
+        echo $tName
+        while [ $flag = 0 ]
+        do 
+            for i in `ls`
+            do
+                if [ $i = $tName ]
+                then 
+                    found=1;
+                    break;
+                else
+                    found=0;
+                fi
+            done
 
-        if [ $found = 1 ]
-        then 
-            flag=1;
-            if [ $1 = "I" ]
+            if [ $found = 1 ]
             then 
-                InsertData $TName
-            elif [ $1 = "D" ]
-            then
-                DeleteData $TName
-            fi
-        else 
-            flag=0;
-            echo $TName "Not found.. Please Re-enter the Table Name: ";
-            read TName;
-        fi            
-    done
+                flag=1;
+                if [ $1 = "I" ]
+                then 
+                    InsertData $TName
+                elif [ $1 = "D" ]
+                then
+                    DeleteData $TName
+                fi
+            else 
+                flag=0;
+                echo $TName "Not found.. Please Re-enter the Table Name: ";
+                read TName;
+            fi            
+        done
+    else
+        echo "Sorry but Database is Empty! "
+    fi        
 }
 
 function TableMenu
