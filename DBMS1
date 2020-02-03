@@ -111,6 +111,7 @@ function DisplayTables
     echo "___________________________________________"; 
 }
 
+#----> function to Creat Meta-Data(INFo) of Table <----#
 function TableMetaData
 {
     touch $1.metaData
@@ -121,16 +122,17 @@ function TableMetaData
     do
         echo "Enter Field Name: "
         read FName;
+        echo $i "Name:"$FName >> $1.metaData;
         echo "Enter Field Datatype: "
         select choice in "Integer" "String"
         do
             case $choice in
-                "Integer") echo "Name:"$FName":Datatype:Int"  >> $1.metaData; break ;;
-                "String") echo "Name:"$FName":Datatype:String"  >> $1.metaData; break ;;
+                "Integer") echo $i "Datatype:Int"  >> $1.metaData; break ;;
+                "String") echo $i "Datatype:String"  >> $1.metaData; break ;;
             esac    
         done
     done
-} 
+}
 
 function CreateTable
 {
@@ -165,6 +167,103 @@ function CreateTable
     done    
 }
 
+#----> function to Insert into Table <----#
+function InsertData
+{
+    echo "--------------------- $1 Table ---------------------"
+    #NoOfCol=`grep "NumberOfCols" $1.metaData | cut -d: -f2`
+    NoOfCol=`sed -n '/:/ s/NumberOfCols://p' $1.metaData`
+    echo $NoOfCol
+    declare -a fieldsNames[$NoOfCol];
+    declare -a fieldsDatatypes[$NoOfCol];
+    NewRecord="";
+    for (( i=1; i<=$NoOfCol; i++ ))
+    do
+        fieldsNames[$i]=`grep "$i Name" $1.metaData | cut -d: -f2`
+        fieldsDatatypes[$i]=`grep "$i Datatype" $1.metaData | cut -d: -f2`
+    done
+
+    for (( i=1; i<=$NoOfCol; i++ ))
+    do
+        #echo $i "----->" $NoOfCol
+        echo ${fieldsTypes[$i]}
+        echo "Enter "${fieldsNames[$i]}" :"
+        read data;
+        flag=0;
+        while [ $flag = 0 ]
+        do
+            case $data in 
+                +([[:lower:]]|[[:upper:]])) datatype="String" ;;
+                +([0-9])) datatype="Int" ;;
+                +([[:lower:]]|[[:upper:]]|[0-9])) echo "Invalid Input... Please Re-enter your Data:"
+                                                  read data ;;
+                *) echo "Invalid Input... Please Re-enter your Data:"
+                                                  read data ;;
+            esac
+            #echo ${fieldsNames[$i]} "---->" $datatype
+            if [ ${fieldsDatatypes[$i]} != $datatype ]
+            then 
+                echo "Invalid Input... Please Re-enter your Data:";
+                read data;
+            else
+                if [ $i == $NoOfCol ]
+                then
+                    NewRecord+=$data;
+                else    
+                    NewRecord+=$data":";
+                fi
+                flag=1;
+            fi
+        done  
+    done
+    echo "Your Data Inserted Successfully...";
+    echo $NewRecord >> $1.data;
+}
+
+function DeleteData
+{
+    echo "Delete"
+}
+
+function SearchOfTable
+{
+    found=0;
+    flag=0;
+    echo "Enter Name of Table";
+    read TName;
+    tName=$TName.data
+    echo $tName
+    while [ $flag = 0 ]
+    do 
+        for i in `ls`
+        do
+            if [ $i = $tName ]
+            then 
+                found=1;
+                break;
+            else
+                found=0;
+            fi
+        done
+
+        if [ $found = 1 ]
+        then 
+            flag=1;
+            if [ $1 = "I" ]
+            then 
+                InsertData $TName
+            elif [ $1 = "D" ]
+            then
+                DeleteData $TName
+            fi
+        else 
+            flag=0;
+            echo $TName "Not found.. Please Re-enter the Table Name: ";
+            read TName;
+        fi            
+    done
+}
+
 function TableMenu
 {
     select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
@@ -172,8 +271,8 @@ function TableMenu
         case $choice in
             "Display Tables") DisplayTables ;;
             "Create Table") CreateTable ;;
-            "Insert in Table") ;;
-            "Delete from Table") ;; 
+            "Insert in Table") SearchOfTable "I" ;;
+            "Delete from Table") SearchOfTable "D" ;; 
             "Select from Table") ;;
             "Exit") cd ..
                     cd .. 
