@@ -266,6 +266,11 @@ function InsertData
     echo $NewRecord >> $1.data;
 }
 
+function SelectFromTable
+{
+    sed -n 'p' $1.data;
+}
+
 function DeleteData
 {
     echo "Delete"
@@ -280,13 +285,13 @@ function SearchOfTable
         flag=0;
         echo "Enter Name of Table";
         read TName;
-        tName=$TName.data
-        echo $tName
+        tableName=$TName.data
+        #echo $tName
         while [ $flag = 0 ]
         do 
             for i in `ls`
             do
-                if [ $i = $tName ]
+                if [ $i = $tableName ]
                 then 
                     found=1;
                     break;
@@ -304,6 +309,9 @@ function SearchOfTable
                 elif [ $1 = "D" ]
                 then
                     DeleteData $TName
+                elif [ $1 = "S" ]
+                then    
+                    SelectFromTable $TName    
                 fi
             else 
                 flag=0;
@@ -325,7 +333,7 @@ function TableMenu
             "Create Table") CreateTable ;;
             "Insert in Table") SearchOfTable "I" ;;
             "Delete from Table") SearchOfTable "D" ;; 
-            "Select from Table") ;;
+            "Select from Table") SearchOfTable "S" ;;
             "Exit") cd ..
                     cd .. 
                     DatabaseMenu ;;
