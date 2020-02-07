@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#----> function to Check if the System is Empty <----#
 function isEmptyDB
 {
     dirList=(`ls Databases`)
@@ -11,6 +12,7 @@ function isEmptyDB
     fi        
 }
 
+#----> function to Check if the Table is Empty <----#
 function isEmptyT
 {
     tableList=(`ls`)
@@ -22,6 +24,7 @@ function isEmptyT
     fi        
 }
 
+#----> function to Display Databases Names <----#
 function DisplayDatabases
 {
     echo "___________________________________________";
@@ -44,41 +47,56 @@ function DisplayDatabases
     echo "___________________________________________"; 
 }
 
+#----> function to Creat Database <----#
 function CreateDatabase
 {
     found=0;
     flag=0;
+    spaceFlag=0;
     echo -n "Enter Name of Database:"
     read DBname;
     while [ $flag == 0 ]
     do 
-        for i in `ls Databases`
-        do 
-            if [ $i == $DBname ]
-            then
-                found=1;
-                break;
-            else  
-                found=0;
-            fi 
-        done
+        case $DBname in 
+            *\ * ) spaceFlag=1;
+                    ;;
+            *) spaceFlag=0;
+                    ;;
+        esac
+        if [ $spaceFlag = 0 ]
+        then
+            for i in `ls Databases`
+            do 
+                if [ $i == $DBname ]
+                then
+                    found=1;
+                    break;
+                else  
+                    found=0;
+                fi 
+            done
 
-        if [ $found == 1 ]
-        then 
-            echo $DBname "is already exist , Re-enter the Name: "
-            read DBname;
-            flag=0;
-        else 
-            cd Databases
-            mkdir $DBname;
-            echo "Database Created Successfully..."
-            flag=1;
-            cd ..
-        fi
+            if [ $found == 1 ]
+            then 
+                echo $DBname "is already exist , Re-enter the Name: "
+                read DBname;
+                flag=0;
+            else 
+                cd Databases
+                mkdir $DBname;
+                echo "Database Created Successfully..."
+                flag=1;
+                cd ..
+            fi
+        else
+            echo "Spaces Not Allowed !!!"
+            echo -n "Re-enter the Name: "
+            read DBname;    
+        fi    
     done
-    
 }
 
+#----> function to Search of Database to help to connect to it <----#
 function ConnectToDatabase
 {
     isEmptyDB
@@ -123,6 +141,7 @@ function ConnectToDatabase
     fi        
 }
 
+#----> function to Display Tables Names <----#
 function DisplayTables
 {
     echo "___________________________________________";
@@ -159,7 +178,7 @@ function TableMetaData
         echo -n "Enter Field Name: "
         read FName;
         echo $i "Name:"$FName >> $1.metaData;
-        echo -n "Enter Field Datatype: "
+        PS3="Enter Field Datatype: "
         select choice in "Integer" "String"
         do
             case $choice in
@@ -169,7 +188,7 @@ function TableMetaData
         done
         if [ $PK = 0 ]
         then
-            echo -n "Make This Field Primary Key?y/n"
+            echo -n "Make This Field Primary Key?y/n "
             read answer
             case $answer in 
                 ?("y"||"Y")) PK=1
@@ -181,36 +200,53 @@ function TableMetaData
     done
 }
 
+
+#----> function to Creat Table <----#
 function CreateTable
 {
     found=0;
     flag=0;
+    spaceFlag=0;
     echo -n "Enter Name of Table: ";
     read TName;
     while [ $flag = 0 ]
     do 
-        for i in `ls`
-        do 
-            if [ $i = $TName.data ]
-            then 
-                found=1;
-                break;
-            else
-                found=0;
-            fi
-        done
+        case $TName in 
+            *\ * ) spaceFlag=1;
+                    ;;
+            *) spaceFlag=0
+                    ;;
+        esac
+        
+        if [ $spaceFlag = 0 ]
+        then
+            for i in `ls`
+            do 
+                if [ $i = $TName.data ]
+                then 
+                    found=1;
+                    break;
+                else
+                    found=0;
+                fi
+            done
 
-        if [ $found = 1 ]
-        then 
-            echo -n $TName "is already Exist... Please Re-enter Name of Table: "
-            read TName;
-            flag=0;
+            if [ $found = 1 ]
+            then 
+                echo -n $TName "is already Exist... Please Re-enter Name of Table: "
+                read TName;
+                flag=0;
+            else
+                touch $TName.data;
+                flag=1;
+                TableMetaData $TName
+                echo $TName "Table Created Successfully...";
+            fi
         else
-            touch $TName.data;
-            flag=1;
-            TableMetaData $TName
-            echo $TName "Table Created Successfully...";
-        fi
+            echo "Spaces Not Allowed !!!"
+            echo -n "Re-enter the Name: "
+            read TName;
+        fi     
     done    
 }
 
@@ -259,12 +295,12 @@ function InsertData
             else
                 #echo $PkCol
                 #echo $i
-                if [ "$PkCol" -eq "$i" ]
+                if [ "$PkCol" -eq "$i" ] && [ -n "$PkData" ]
                 then
                     #echo "hhhh"
                     for item in ${PkData[@]}
                     do
-                        if [ "$data" -eq "$item" ]
+                        if [ $data = $item ]
                         then 
                             echo -n "Invalid Input... Please Re-enter your Data:";
                             read data;
@@ -279,7 +315,7 @@ function InsertData
                     done
                     if [ $Pkflag = 1 ]
                     then
-                        echo "PK";
+                        #echo "PK";
                         if [ "$i" -eq "$NoOfCol" ]
                         then
                             NewRecord+=$data;
@@ -303,6 +339,8 @@ function InsertData
     echo $NewRecord >> $1.data;
 }
 
+
+#----> function to Select All Data From Table <----#
 function SelectFromTable
 {
     echo "------------------- $1 Table Data -------------------"
@@ -316,13 +354,15 @@ function SelectFromTable
     fi        
 }
 
+
+#----> function to Delete Row(s) From Table <----#
 function DeleteData
 {   
     echo "--------------------- $1 Table ---------------------"
     counter=(`wc -l $1.data`)
     if [ -s $1.data ]           # check if the table is Empty 
     then 
-        echo -n "How many Rows you want to Delete?"
+        echo -n "How many Rows you want to Delete ? "
         read NoOfRows
         #echo $NoOfRows "U"
         #echo $1
@@ -335,7 +375,8 @@ function DeleteData
                 read x
                 sed -i "$x d" $1.data
                 echo $NoOfRows "Deleted" 
-                echo "Your Data Deleted Successfully..." 
+                echo "Your Data Deleted Successfully..."
+                echo "---------------------------------"
             elif [ $NoOfRows == 0 ]
             then
                 echo "Okey XD"    
@@ -345,20 +386,19 @@ function DeleteData
                 read start;
                 echo -n "To : "
                 read end;
-                #echo ${counter[0]}
+                #echo ${counter[0]} "C"
                 #echo $start
-                #echo $end
-                if [ ${counter[0]} < $start ] || [ ${counter[0]} < $end ]  # check if the number of record in rang 
+                #echo $end "E"
+                if [ "${counter[0]}" -lt "$start" ] || [ "${counter[0]}" -lt "$end" ]  # check if the number of record in rang 
                 then 
                     echo "Invalid Input..." 
                 else
                     #echo "Dalia"
                     sed -i "$start,$end d" $1.data  
                     echo $NoOfRows "Deleted" 
-                    echo "Your Data Deleted Successfully..."  
-                fi    
-            else
-                echo "Invalid Input..."     
+                    echo "Your Data Deleted Successfully..."
+                    echo "---------------------------------"
+                fi        
             fi
         else
             echo "Invalid Input..."
@@ -368,6 +408,7 @@ function DeleteData
     fi        
 }
 
+#----> function to Search of specific Table to Insert on it <----#
 function SearchOfTable
 {
     isEmptyT
@@ -419,6 +460,7 @@ function SearchOfTable
     fi        
 }
 
+#----> function to Display Menu to Usre to access the database tables <----#
 function TableMenu
 {
     while [ true ]
@@ -455,6 +497,7 @@ function TableMenu
     done         
 }
 
+#----> function to Display Menu to Usre to access the databases <----#
 function DatabaseMenu
 {
     while [ true ]
