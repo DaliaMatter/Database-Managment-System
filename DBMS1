@@ -25,13 +25,14 @@ function isEmptyT
 function DisplayDatabases
 {
     echo "___________________________________________";
-    echo "Your Databases List: "
+    echo "";
     index=1;
     isEmptyDB
     dirList=(`ls Databases`)
     #echo ${#dirList[@]}
     if [ $isEmpty != 0 ]
     then
+        echo "Your Databases List: "
         for i in ${dirList[@]}
         do 
             echo "("$index")" $i
@@ -47,7 +48,7 @@ function CreateDatabase
 {
     found=0;
     flag=0;
-    echo "Enter Name of Database:"
+    echo -n "Enter Name of Database:"
     read DBname;
     while [ $flag == 0 ]
     do 
@@ -86,7 +87,7 @@ function ConnectToDatabase
         cd Databases
         flag=0;
         found=0;
-        echo "Enter Name of Database: "
+        echo -n "Enter Name of Database: "
         read DBname;
         while [ $flag == 0 ]
         do
@@ -104,12 +105,13 @@ function ConnectToDatabase
             if [ $found == 1 ]
             then
                 cd $DBname;
+                clear
                 echo "Connected Successfully...";
                 echo "------------------------ "$DBname "Database ------------------------"
                 TableMenu
                 flag=1;
             else
-                echo $DBname "Not found.. Please Re-enter the Database Name: ";
+                echo -n $DBname "Not found.. Please Re-enter the Database Name: ";
                 read DBname;
                 flag=0;
             fi
@@ -124,13 +126,14 @@ function ConnectToDatabase
 function DisplayTables
 {
     echo "___________________________________________";
-    echo "Your Table List: "
+    echo "";
     index=1;
     isEmptyT
     tableList=(`ls`)
     #echo ${#tableList[@]}
     if [ $isEmptyy != 0 ]
     then 
+        echo "Your Table List: "
         for i in `ls *data`
         do 
         
@@ -153,10 +156,10 @@ function TableMetaData
     echo "NumberOfCols:"$NoOfCol >> $1.metaData;
     for (( i=1; i<=$NoOfCol; i++ ))
     do
-        echo "Enter Field Name: "
+        echo -n "Enter Field Name: "
         read FName;
         echo $i "Name:"$FName >> $1.metaData;
-        echo "Enter Field Datatype: "
+        echo -n "Enter Field Datatype: "
         select choice in "Integer" "String"
         do
             case $choice in
@@ -166,7 +169,7 @@ function TableMetaData
         done
         if [ $PK = 0 ]
         then
-            echo "Make This Field Primary Key?y/n"
+            echo -n "Make This Field Primary Key?y/n"
             read answer
             case $answer in 
                 ?("y"||"Y")) PK=1
@@ -182,7 +185,7 @@ function CreateTable
 {
     found=0;
     flag=0;
-    echo "Enter Name of Table: ";
+    echo -n "Enter Name of Table: ";
     read TName;
     while [ $flag = 0 ]
     do 
@@ -199,7 +202,7 @@ function CreateTable
 
         if [ $found = 1 ]
         then 
-            echo $TName "is already Exist... Please Re-enter Name of Table: "
+            echo -n $TName "is already Exist... Please Re-enter Name of Table: "
             read TName;
             flag=0;
         else
@@ -233,7 +236,7 @@ function InsertData
     do
         #echo $i "----->" $NoOfCol
         #echo ${fieldsTypes[$i]}
-        echo "Enter "${fieldsNames[$i]}" :"
+        echo -n "Enter "${fieldsNames[$i]}" :"
         read data;
         flag=0;
         while [ $flag = 0 ]
@@ -241,18 +244,18 @@ function InsertData
             case $data in 
                 +([[:lower:]]|[[:upper:]])) datatype="String" ;;
                 +([0-9])) datatype="Int" ;;
-                +([[:lower:]]|[[:upper:]]|[0-9])) echo "Invalid Input... Please Re-enter your Data:"
+                +([[:lower:]]|[[:upper:]]|[0-9])) echo -n "Invalid Input... Please Re-enter your Data:"
                                                   read data ;;
-                *) echo "Invalid Input... Please Re-enter your Data:"
+                *) echo -n "Invalid Input... Please Re-enter your Data:"
                                                   read data ;;
             esac
             #echo ${fieldsNames[$i]} "---->" $datatype
             if [ ${fieldsDatatypes[$i]} != $datatype ]
             then 
-                echo "Invalid Input... Please Re-enter your Data:";
+                echo -n "Invalid Input... Please Re-enter your Data:";
                 read data;
             else
-                if [ $i == $NoOfCol ]
+                if [ "$i" -eq "$NoOfCol" ]
                 then
                     NewRecord+=$data;
                 else    
@@ -268,25 +271,24 @@ function InsertData
 
 function SelectFromTable
 {
-<<<<<<< HEAD
+    echo "------------------- $1 Table Data -------------------"
     Output=$( sed -n 'p' $1.data)
-    if [ -z  $Output ]
+    if [ -z  "$Output" ]
     then 
         echo "This table is Empty!";
     else
-        echo $Output
+        #echo $Output
+        printf '%s\n' "${Output[@]}"
     fi        
-=======
-    sed -n 'p' $1.data;
->>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
 }
 
 function DeleteData
-{
+{   
+    echo "--------------------- $1 Table ---------------------"
     counter=(`wc -l $1.data`)
     if [ -s $1.data ]           # check if the table is Empty 
     then 
-        echo "How many Rows you want to Delete?"
+        echo -n "How many Rows you want to Delete?"
         read NoOfRows
         #echo $NoOfRows "U"
         #echo $1
@@ -295,7 +297,7 @@ function DeleteData
         then
             if [ $NoOfRows == 1 ]    # check on the number of the record is valid 
             then
-                echo "Which Row you want to Delete: ";
+                echo -n "Which Row you want to Delete: ";
                 read x
                 sed -i "$x d" $1.data
                 echo $NoOfRows "Deleted" 
@@ -305,16 +307,16 @@ function DeleteData
                 echo "Okey XD"    
             elif [ $NoOfRows > 1 ]
             then
-                echo "From : "
+                echo -n "From : "
                 read start;
-                echo "To : "
+                echo -n "To : "
                 read end;
                 #echo ${counter[0]}
                 #echo $start
                 #echo $end
                 if [ ${counter[0]} < $start ] || [ ${counter[0]} < $end ]  # check if the number of record in rang 
                 then 
-                    echo "Invalid Input...1" 
+                    echo "Invalid Input..." 
                 else
                     #echo "Dalia"
                     sed -i "$start,$end d" $1.data  
@@ -322,10 +324,10 @@ function DeleteData
                     echo "Your Data Deleted Successfully..."  
                 fi    
             else
-                echo "Invalid Input...2"     
+                echo "Invalid Input..."     
             fi
         else
-            echo "Invalid Input...3"
+            echo "Invalid Input..."
         fi
     else
         echo "This table is Empty!";
@@ -339,13 +341,8 @@ function SearchOfTable
     then
         found=0;
         flag=0;
-        echo "Enter Name of Table";
+        echo -n "Enter Name of Table: ";
         read TName;
-<<<<<<< HEAD
-        
-=======
-        tableName=$TName.data
->>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
         #echo $tName
         while [ $flag = 0 ]
         do 
@@ -376,77 +373,77 @@ function SearchOfTable
                 fi
             else 
                 flag=0;
-                echo $TName "Not found.. Please Re-enter the Table Name: ";
+                echo -n $TName "Not found.. Please Re-enter the Table Name: ";
                 read TName;
             fi            
         done
     else
-        echo "Sorry but Database is Empty! "
+        echo "___________________________________________";
+        echo "";
+        echo "Sorry but $TName Database is Empty! ";
+        echo "___________________________________________";
     fi        
 }
 
 function TableMenu
 {
-<<<<<<< HEAD
     while [ true ]
     do 
+        PS3="What do you want to do ? "
         select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
         do
             case $choice in
-                "Display Tables") DisplayTables 
-                                    break ;;
-                "Create Table") CreateTable 
-                                    break ;;
-                "Insert in Table") SearchOfTable "I" 
-                                    break ;;
-                "Delete from Table") SearchOfTable "D" 
-                                    break ;; 
-                "Select from Table") SearchOfTable "S" 
-                                    break ;;
+                "Display Tables") clear
+                                  DisplayTables 
+                                  break ;;
+                "Create Table") clear
+                                CreateTable 
+                                break ;;
+                "Insert in Table") clear
+                                   SearchOfTable "I" 
+                                   break ;;
+                "Delete from Table") clear
+                                     SearchOfTable "D" 
+                                     break ;; 
+                "Select from Table") clear
+                                     SearchOfTable "S" 
+                                     break ;;
                 "Exit") cd ..
                         cd .. 
+                        clear
                         DatabaseMenu 
                         break ;;
-                *) echo "Invalid Option !!!" 
-                        break ;;       
+                *) clear
+                   echo "Invalid Option !!!" 
+                   break ;;       
             esac
         done
     done         
-=======
-    select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
-    do
-        case $choice in
-            "Display Tables") DisplayTables ;;
-            "Create Table") CreateTable ;;
-            "Insert in Table") SearchOfTable "I" ;;
-            "Delete from Table") SearchOfTable "D" ;; 
-            "Select from Table") SearchOfTable "S" ;;
-            "Exit") cd ..
-                    cd .. 
-                    DatabaseMenu ;;
-        esac
-    done       
->>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
 }
 
 function DatabaseMenu
 {
     while [ true ]
     do
+        PS3="What do you want to do ? "
         echo "------------ Welcome in Nahla & Dalia Database Managment System ------------";
         select choice in "Display All Dalabases" "Create New Database" "Connect on Database" "Exit"
         do 
             case $choice in 
-                "Display All Dalabases") DisplayDatabases 
-                                            break ;;
-                "Create New Database") CreateDatabase 
-                                            break ;;
-                "Connect on Database") ConnectToDatabase 
-                                            break ;;
+                "Display All Dalabases") clear
+                                         DisplayDatabases 
+                                         break ;;
+                "Create New Database") clear
+                                       CreateDatabase 
+                                       break ;;
+                "Connect on Database") clear
+                                       ConnectToDatabase 
+                                       break ;;
                 "Exit") exit ;;
 
-                *) echo "Invalid Option !!!" 
-                        break ;;
+                *) clear
+                   echo "Invalid Option !!!" 
+                   break ;;
             esac
         done
     done
