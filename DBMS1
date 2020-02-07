@@ -169,7 +169,7 @@ function TableMetaData
             echo "Make This Field Primary Key?y/n"
             read answer
             case $answer in 
-                ?("y"||"Y")) PK=1; 
+                ?("y"||"Y")) PK=1
                              echo "PK:$i" >> $1.metaData ;;
                 ?("n"||"N")) PK=0 ;;
                 *) echo "Invalid Input.. So it's No XD "
@@ -188,7 +188,7 @@ function CreateTable
     do 
         for i in `ls`
         do 
-            if [ $i = $TName ]
+            if [ $i = $TName.data ]
             then 
                 found=1;
                 break;
@@ -266,9 +266,66 @@ function InsertData
     echo $NewRecord >> $1.data;
 }
 
+function SelectFromTable
+{
+    Output=$( sed -n 'p' $1.data)
+    if [ -z  $Output ]
+    then 
+        echo "This table is Empty!";
+    else
+        echo $Output
+    fi        
+}
+
 function DeleteData
 {
-    echo "Delete"
+    counter=(`wc -l $1.data`)
+    if [ -s $1.data ]           # check if the table is Empty 
+    then 
+        echo "How many Rows you want to Delete?"
+        read NoOfRows
+        #echo $NoOfRows "U"
+        #echo $1
+        #echo ${counter[0]} "E"
+        if [ "${counter[0]}" -ge "$NoOfRows" ] # check if the table can delete the nimber of records the user want to delete
+        then
+            if [ $NoOfRows == 1 ]    # check on the number of the record is valid 
+            then
+                echo "Which Row you want to Delete: ";
+                read x
+                sed -i "$x d" $1.data
+                echo $NoOfRows "Deleted" 
+                echo "Your Data Deleted Successfully..." 
+            elif [ $NoOfRows == 0 ]
+            then
+                echo "Okey XD"    
+            elif [ $NoOfRows > 1 ]
+            then
+                echo "From : "
+                read start;
+                echo "To : "
+                read end;
+                #echo ${counter[0]}
+                #echo $start
+                #echo $end
+                if [ ${counter[0]} < $start ] || [ ${counter[0]} < $end ]  # check if the number of record in rang 
+                then 
+                    echo "Invalid Input...1" 
+                else
+                    #echo "Dalia"
+                    sed -i "$start,$end d" $1.data  
+                    echo $NoOfRows "Deleted" 
+                    echo "Your Data Deleted Successfully..."  
+                fi    
+            else
+                echo "Invalid Input...2"     
+            fi
+        else
+            echo "Invalid Input...3"
+        fi
+    else
+        echo "This table is Empty!";
+    fi        
 }
 
 function SearchOfTable
@@ -280,13 +337,14 @@ function SearchOfTable
         flag=0;
         echo "Enter Name of Table";
         read TName;
-        tName=$TName.data
-        echo $tName
+        
+        #echo $tName
         while [ $flag = 0 ]
         do 
+            tableName=$TName.data
             for i in `ls`
             do
-                if [ $i = $tName ]
+                if [ $i = $tableName ]
                 then 
                     found=1;
                     break;
@@ -304,6 +362,9 @@ function SearchOfTable
                 elif [ $1 = "D" ]
                 then
                     DeleteData $TName
+                elif [ $1 = "S" ]
+                then    
+                    SelectFromTable $TName    
                 fi
             else 
                 flag=0;
@@ -318,34 +379,53 @@ function SearchOfTable
 
 function TableMenu
 {
-    select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
-    do
-        case $choice in
-            "Display Tables") DisplayTables ;;
-            "Create Table") CreateTable ;;
-            "Insert in Table") SearchOfTable "I" ;;
-            "Delete from Table") SearchOfTable "D" ;; 
-            "Select from Table") ;;
-            "Exit") cd ..
-                    cd .. 
-                    DatabaseMenu ;;
-        esac
-    done       
+    while [ true ]
+    do 
+        select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
+        do
+            case $choice in
+                "Display Tables") DisplayTables 
+                                    break ;;
+                "Create Table") CreateTable 
+                                    break ;;
+                "Insert in Table") SearchOfTable "I" 
+                                    break ;;
+                "Delete from Table") SearchOfTable "D" 
+                                    break ;; 
+                "Select from Table") SearchOfTable "S" 
+                                    break ;;
+                "Exit") cd ..
+                        cd .. 
+                        DatabaseMenu 
+                        break ;;
+                *) echo "Invalid Option !!!" 
+                        break ;;       
+            esac
+        done
+    done         
 }
 
 function DatabaseMenu
 {
-    echo "------------ Welcome in Nahla & Dalia Database Managment System ------------";
-    select choice in "Display All Dalabases" "Create New Database" "Connect on Database" "Exit"
-    do 
-        case $choice in 
-            "Display All Dalabases") DisplayDatabases ;;
-            "Create New Database") CreateDatabase ;;
-            "Connect on Database") ConnectToDatabase ;;
-            "Exit") exit ;;
-        esac
+    while [ true ]
+    do
+        echo "------------ Welcome in Nahla & Dalia Database Managment System ------------";
+        select choice in "Display All Dalabases" "Create New Database" "Connect on Database" "Exit"
+        do 
+            case $choice in 
+                "Display All Dalabases") DisplayDatabases 
+                                            break ;;
+                "Create New Database") CreateDatabase 
+                                            break ;;
+                "Connect on Database") ConnectToDatabase 
+                                            break ;;
+                "Exit") exit ;;
+
+                *) echo "Invalid Option !!!" 
+                        break ;;
+            esac
+        done
     done
-    
 }
 
 DatabaseMenu
