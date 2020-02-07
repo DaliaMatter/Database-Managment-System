@@ -268,6 +268,7 @@ function InsertData
 
 function SelectFromTable
 {
+<<<<<<< HEAD
     Output=$( sed -n 'p' $1.data)
     if [ -z  $Output ]
     then 
@@ -275,6 +276,9 @@ function SelectFromTable
     else
         echo $Output
     fi        
+=======
+    sed -n 'p' $1.data;
+>>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
 }
 
 function DeleteData
@@ -337,7 +341,11 @@ function SearchOfTable
         flag=0;
         echo "Enter Name of Table";
         read TName;
+<<<<<<< HEAD
         
+=======
+        tableName=$TName.data
+>>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
         #echo $tName
         while [ $flag = 0 ]
         do 
@@ -379,6 +387,7 @@ function SearchOfTable
 
 function TableMenu
 {
+<<<<<<< HEAD
     while [ true ]
     do 
         select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
@@ -403,6 +412,21 @@ function TableMenu
             esac
         done
     done         
+=======
+    select choice in "Display Tables" "Create Table" "Insert in Table" "Delete from Table" "Select from Table" "Exit"
+    do
+        case $choice in
+            "Display Tables") DisplayTables ;;
+            "Create Table") CreateTable ;;
+            "Insert in Table") SearchOfTable "I" ;;
+            "Delete from Table") SearchOfTable "D" ;; 
+            "Select from Table") SearchOfTable "S" ;;
+            "Exit") cd ..
+                    cd .. 
+                    DatabaseMenu ;;
+        esac
+    done       
+>>>>>>> dd59cf02568157f3bf803e4c61d8d2235c84a63b
 }
 
 function DatabaseMenu
