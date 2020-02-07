@@ -24,7 +24,7 @@ function isEmptyT
     fi        
 }
 
-#----> function to Display Databases Names <----#
+#----> function to Display Databases Name <----#
 function DisplayDatabases
 {
     echo "___________________________________________";
@@ -47,7 +47,7 @@ function DisplayDatabases
     echo "___________________________________________"; 
 }
 
-#----> function to Creat Database <----#
+#----> function to Create Database <----#
 function CreateDatabase
 {
     found=0;
@@ -96,7 +96,7 @@ function CreateDatabase
     done
 }
 
-#----> function to Search of Database to help to connect to it <----#
+#----> function to Search for Database to help user to connect to it <----#
 function ConnectToDatabase
 {
     isEmptyDB
@@ -165,7 +165,7 @@ function DisplayTables
     echo "___________________________________________"; 
 }
 
-#----> function to Creat Meta-Data(INFo) of Table <----#
+#----> function to Create Meta-Data(INFo) of Table <----#
 function TableMetaData
 {
     touch $1.metaData
@@ -201,7 +201,7 @@ function TableMetaData
 }
 
 
-#----> function to Creat Table <----#
+#----> function to Create Table <----#
 function CreateTable
 {
     found=0;
@@ -367,9 +367,9 @@ function DeleteData
         #echo $NoOfRows "U"
         #echo $1
         #echo ${counter[0]} "E"
-        if [ "${counter[0]}" -ge "$NoOfRows" ] # check if the table can delete the nimber of records the user want to delete
+        if [ "${counter[0]}" -ge "$NoOfRows" ] # check if the table can delete the number of records the user want to delete
         then
-            if [ $NoOfRows == 1 ]    # check on the number of the record is valid 
+            if [ $NoOfRows == 1 ]    # check on the number of the record if it is valid 
             then
                 echo -n "Which Row you want to Delete: ";
                 read x
@@ -389,7 +389,7 @@ function DeleteData
                 #echo ${counter[0]} "C"
                 #echo $start
                 #echo $end "E"
-                if [ "${counter[0]}" -lt "$start" ] || [ "${counter[0]}" -lt "$end" ]  # check if the number of record in rang 
+                if [ "${counter[0]}" -lt "$start" ] || [ "${counter[0]}" -lt "$end" ]  # check if the number of the record is in range 
                 then 
                     echo "Invalid Input..." 
                 else
@@ -408,7 +408,7 @@ function DeleteData
     fi        
 }
 
-#----> function to Search of specific Table to Insert on it <----#
+#----> function to Search for specific Table to Insert in it <----#
 function SearchOfTable
 {
     isEmptyT
@@ -460,7 +460,7 @@ function SearchOfTable
     fi        
 }
 
-#----> function to Display Menu to Usre to access the database tables <----#
+#----> function to Display Menu to User to access the database tables <----#
 function TableMenu
 {
     while [ true ]
@@ -497,7 +497,7 @@ function TableMenu
     done         
 }
 
-#----> function to Display Menu to Usre to access the databases <----#
+#----> function to Display Menu to User to access the databases <----#
 function DatabaseMenu
 {
     while [ true ]
