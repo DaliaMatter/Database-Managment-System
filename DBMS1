@@ -222,9 +222,10 @@ function InsertData
     NoOfCol=`sed -n '/:/ s/NumberOfCols://p' $1.metaData`
     PkCol=`sed -n '/:/ s/PK://p' $1.metaData`
     #echo $NoOfCol
-    #echo $PkCol
     declare -a fieldsNames[$NoOfCol];
     declare -a fieldsDatatypes[$NoOfCol];
+    PkData=`cut -d: -f $PkCol $1.data`
+    #echo $PkData
     NewRecord="";
     for (( i=1; i<=$NoOfCol; i++ ))
     do
@@ -239,6 +240,7 @@ function InsertData
         echo -n "Enter "${fieldsNames[$i]}" :"
         read data;
         flag=0;
+        Pkflag=0;
         while [ $flag = 0 ]
         do
             case $data in 
@@ -255,15 +257,47 @@ function InsertData
                 echo -n "Invalid Input... Please Re-enter your Data:";
                 read data;
             else
-                if [ "$i" -eq "$NoOfCol" ]
+                #echo $PkCol
+                #echo $i
+                if [ "$PkCol" -eq "$i" ]
                 then
-                    NewRecord+=$data;
-                else    
-                    NewRecord+=$data":";
+                    #echo "hhhh"
+                    for item in ${PkData[@]}
+                    do
+                        if [ "$data" -eq "$item" ]
+                        then 
+                            echo -n "Invalid Input... Please Re-enter your Data:";
+                            read data;
+                            flag=0;
+                            Pkflag=0;
+                            break;
+                        else
+                            #echo "PK"
+                            flag=1;
+                            Pkflag=1;    
+                        fi    
+                    done
+                    if [ $Pkflag = 1 ]
+                    then
+                        echo "PK";
+                        if [ "$i" -eq "$NoOfCol" ]
+                        then
+                            NewRecord+=$data;
+                        else    
+                            NewRecord+=$data":";
+                        fi
+                    fi    
+                else 
+                    if [ "$i" -eq "$NoOfCol" ]
+                    then
+                        NewRecord+=$data;
+                    else    
+                        NewRecord+=$data":";
+                    fi
+                    flag=1;
                 fi
-                flag=1;
             fi
-        done  
+        done   
     done
     echo "Your Data Inserted Successfully...";
     echo $NewRecord >> $1.data;
