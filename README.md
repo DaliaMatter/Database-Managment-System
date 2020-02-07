@@ -34,5 +34,6 @@ and there is Simple Select Menu to help you to do what you want
 
 ## Authors
 
+* **Dalia Mohamed** - [DaliaMatter](https://github.com/DaliaMatter)
 * **Nahla Ahmed** - [nahlaahmed97](https://github.com/nahlaahmed97)
 
