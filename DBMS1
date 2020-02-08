@@ -170,34 +170,43 @@ function TableMetaData
 {
     touch $1.metaData
     PK=0;
+    removeFlag=0;
     echo "Enter Number Of Fields: "
     read NoOfCol;
-    echo "NumberOfCols:"$NoOfCol >> $1.metaData;
-    for (( i=1; i<=$NoOfCol; i++ ))
-    do
-        echo -n "Enter Field Name: "
-        read FName;
-        echo $i "Name:"$FName >> $1.metaData;
-        PS3="Enter Field Datatype: "
-        select choice in "Integer" "String"
+    #echo "$NoOfCol"
+    if [ "$NoOfCol" -gt 0 ]
+    then
+        echo "NumberOfCols:"$NoOfCol >> $1.metaData;
+        for (( i=1; i<=$NoOfCol; i++ ))
         do
-            case $choice in
-                "Integer") echo $i "Datatype:Int"  >> $1.metaData; break ;;
-                "String") echo $i "Datatype:String"  >> $1.metaData; break ;;
-            esac    
+            echo -n "Enter Field Name: "
+            read FName;
+            echo $i "Name:"$FName >> $1.metaData;
+            PS3="Enter Field Datatype: "
+            select choice in "Integer" "String"
+            do
+                case $choice in
+                    "Integer") echo $i "Datatype:Int"  >> $1.metaData; break ;;
+                    "String") echo $i "Datatype:String"  >> $1.metaData; break ;;
+                esac    
+            done
+            if [ $PK = 0 ]
+            then
+                echo -n "Make This Field Primary Key?y/n "
+                read answer
+                case $answer in 
+                    ?("y"||"Y")) PK=1
+                                echo "PK:$i" >> $1.metaData ;;
+                    ?("n"||"N")) PK=0 ;;
+                    *) echo "Invalid Input.. So it's No XD "
+                esac
+            fi
         done
-        if [ $PK = 0 ]
-        then
-            echo -n "Make This Field Primary Key?y/n "
-            read answer
-            case $answer in 
-                ?("y"||"Y")) PK=1
-                             echo "PK:$i" >> $1.metaData ;;
-                ?("n"||"N")) PK=0 ;;
-                *) echo "Invalid Input.. So it's No XD "
-            esac
-        fi
-    done
+    else
+        echo "Invalid Input...";
+        rm $1.metaData $1.data
+        removeFlag=1;
+    fi       
 }
 
 
@@ -238,9 +247,16 @@ function CreateTable
                 flag=0;
             else
                 touch $TName.data;
-                flag=1;
+                
                 TableMetaData $TName
-                echo $TName "Table Created Successfully...";
+                if [ $removeFlag = 0 ]
+                then
+                    echo $TName "Table Created Successfully...";
+                    flag=1;
+                else
+                    echo -n "Re-enter the Name: "
+                    read TName;
+                fi     
             fi
         else
             echo "Spaces Not Allowed !!!"
