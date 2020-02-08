@@ -219,7 +219,7 @@ function InsertData
     NoOfCol=`sed -n '/:/ s/NumberOfCols://p' $1.metaData`
     PkCol=`sed -n '/:/ s/PK://p' $1.metaData`
     #echo $NoOfCol
-    echo $PkCol
+    #echo $PkCol
     declare -a fieldsNames[$NoOfCol];
     declare -a fieldsDatatypes[$NoOfCol];
     NewRecord="";
