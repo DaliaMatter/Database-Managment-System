@@ -209,7 +209,6 @@ function TableMetaData
     fi       
 }
 
-
 #----> function to Create Table <----#
 function CreateTable
 {
@@ -355,7 +354,6 @@ function InsertData
     echo $NewRecord >> $1.data;
 }
 
-
 #----> function to Select All Data From Table <----#
 function SelectFromTable
 {
@@ -369,7 +367,6 @@ function SelectFromTable
         printf '%s\n' "${Output[@]}"
     fi        
 }
-
 
 #----> function to Delete Row(s) From Table <----#
 function DeleteData
