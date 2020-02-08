@@ -55,45 +55,50 @@ function CreateDatabase
     spaceFlag=0;
     echo -n "Enter Name of Database:"
     read DBname;
-    while [ $flag == 0 ]
-    do 
-        case $DBname in 
-            *\ * ) spaceFlag=1;
-                    ;;
-            *) spaceFlag=0;
-                    ;;
-        esac
-        if [ $spaceFlag = 0 ]
-        then
-            for i in `ls Databases`
-            do 
-                if [ $i == $DBname ]
-                then
-                    found=1;
-                    break;
-                else  
-                    found=0;
-                fi 
-            done
+    if [ -z $DBname ]
+    then 
+        echo "Invalid Input..."
+    else    
+        while [ $flag == 0 ]
+        do 
+            case $DBname in 
+                *\ * ) spaceFlag=1;
+                        ;;
+                *) spaceFlag=0;
+                        ;;
+            esac
+            if [ $spaceFlag = 0 ]
+            then
+                for i in `ls Databases`
+                do 
+                    if [ $i == $DBname ]
+                    then
+                        found=1;
+                        break;
+                    else  
+                        found=0;
+                    fi 
+                done
 
-            if [ $found == 1 ]
-            then 
-                echo $DBname "is already exist , Re-enter the Name: "
-                read DBname;
-                flag=0;
-            else 
-                cd Databases
-                mkdir $DBname;
-                echo "Database Created Successfully..."
-                flag=1;
-                cd ..
-            fi
-        else
-            echo "Spaces Not Allowed !!!"
-            echo -n "Re-enter the Name: "
-            read DBname;    
-        fi    
-    done
+                if [ $found == 1 ]
+                then 
+                    echo $DBname "is already exist , Re-enter the Name: "
+                    read DBname;
+                    flag=0;
+                else 
+                    cd Databases
+                    mkdir $DBname;
+                    echo "Database Created Successfully..."
+                    flag=1;
+                    cd ..
+                fi
+            else
+                echo "Spaces Not Allowed !!!"
+                echo -n "Re-enter the Name: "
+                read DBname;    
+            fi    
+        done
+    fi
 }
 
 #----> function to Search for Database to help user to connect to it <----#
@@ -217,52 +222,57 @@ function CreateTable
     spaceFlag=0;
     echo -n "Enter Name of Table: ";
     read TName;
-    while [ $flag = 0 ]
-    do 
-        case $TName in 
-            *\ * ) spaceFlag=1;
-                    ;;
-            *) spaceFlag=0
-                    ;;
-        esac
-        
-        if [ $spaceFlag = 0 ]
-        then
-            for i in `ls`
-            do 
-                if [ $i = $TName.data ]
-                then 
-                    found=1;
-                    break;
-                else
-                    found=0;
-                fi
-            done
+    if [ -z $TName ]
+    then
+        echo "Invalid Input..."
+    else    
+        while [ $flag = 0 ]
+        do 
+            case $TName in 
+                *\ * ) spaceFlag=1;
+                        ;;
+                *) spaceFlag=0
+                        ;;
+            esac
+            
+            if [ $spaceFlag = 0 ]
+            then
+                for i in `ls`
+                do 
+                    if [ $i = $TName.data ]
+                    then 
+                        found=1;
+                        break;
+                    else
+                        found=0;
+                    fi
+                done
 
-            if [ $found = 1 ]
-            then 
-                echo -n $TName "is already Exist... Please Re-enter Name of Table: "
-                read TName;
-                flag=0;
-            else
-                touch $TName.data;
-                
-                TableMetaData $TName
-                if [ $removeFlag = 0 ]
-                then
-                    echo $TName "Table Created Successfully...";
-                    flag=1;
-                else
-                    echo -n "Re-enter the Name: "
+                if [ $found = 1 ]
+                then 
+                    echo -n $TName "is already Exist... Please Re-enter Name of Table: "
                     read TName;
-                fi     
-            fi
-        else
-            echo "Spaces Not Allowed !!!"
-            echo -n "Re-enter the Name: "
-            read TName;
-        fi     
-    done    
+                    flag=0;
+                else
+                    touch $TName.data;
+                    
+                    TableMetaData $TName
+                    if [ $removeFlag = 0 ]
+                    then
+                        echo $TName "Table Created Successfully...";
+                        flag=1;
+                    else
+                        echo -n "Re-enter the Name: "
+                        read TName;
+                    fi     
+                fi
+            else
+                echo "Spaces Not Allowed !!!"
+                echo -n "Re-enter the Name: "
+                read TName;
+            fi     
+        done
+    fi   
 }
 
 #----> function to Insert into Table <----#
